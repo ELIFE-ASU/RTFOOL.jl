@@ -1,6 +1,6 @@
 The RTFOOL.jl package is licensed under the MIT "Expat" License:
 
-> Copyright (c) 2018: Douglas G. Moore.
+> Copyright (c) 2018: Nicole Y. Halpern, Nicolas Mathis, Douglas G. Moore, Sara I. Walker
 >
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
