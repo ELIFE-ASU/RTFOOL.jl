@@ -18,3 +18,10 @@ end
     @test RTFOOL.boltzmann(1/3, [1, 2, 3]) ==
         [e^-(1/3), e^-(2/3), e^-1] / (e^-(1/3) + e^-(2/3) + e^-1)
 end
+
+@testset "Resources" begin
+    @test_throws MethodError Resource([], [])
+    @test_throws ArgumentError Resource([0.5], [0.0])
+    @test_throws ArgumentError Resource([0.5, 0.25], [0.0, 1.0])
+    @test_throws DimensionMismatch Resource([0.5, 0.5], [0.0])
+end

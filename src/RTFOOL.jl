@@ -1,5 +1,7 @@
 module RTFOOL
 
+export Resource
+
 """
     boltzmann(β, E::Number)
 
@@ -16,6 +18,24 @@ function boltzmann(β, E)
     factors = boltzmann.(β, E)
     partition = sum(factors)
     factors ./ partition
+end
+
+"""
+    Resource(p, H)
+
+Construct a resource with state (probability array) `p` and Hamiltonian (energy array) `H`.
+"""
+struct Resource
+    p::Vector{Float64}
+    H::Vector{Float64}
+
+    Resource(p, H) = if !(sum(p) ≈ 1.0)
+        throw(ArgumentError("probability array is not normalized"))
+    elseif size(p) != size(H)
+        throw(DimensionMismatch("size(p) != size(H)"))
+    else
+        new(p, H)
+    end
 end
 
 end

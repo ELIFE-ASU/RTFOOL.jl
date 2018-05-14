@@ -5,3 +5,9 @@ CurrentModule = RTFOOL
 DocTestSetup = :(using RTFOOL)
 ```
 
+# API Documentation
+
+## Resources
+```@docs
+Resource
+```
