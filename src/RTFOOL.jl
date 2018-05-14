@@ -215,11 +215,18 @@ struct Context
     Nm::Int
     Nw::Int
 
-    function Context(β, Hm, Nm, Hw, Nw)
+    system::Resource
+    ms::Vector{Int}
+    ws::Vector{Int}
+
+    function Context(β, Hm, ms, Nm, Hw, ws, Nw)
         monomer = Resource(β, Hm)
         water = Resource(β, Hw)
         bath = tensor((monomer, Nm), (water, Nw))
-        new(β, monomer, water, bath, Nm, Nw)
+
+        system, _, _ = pure_system(Hm, ms, Hw, ws)
+
+        new(β, monomer, water, bath, Nm, Nw, system, ms, ws)
     end
 end
 
