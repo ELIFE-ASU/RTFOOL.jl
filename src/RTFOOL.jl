@@ -24,6 +24,11 @@ end
     Resource(p, H)
 
 Construct a resource with state (probability array) `p` and Hamiltonian (energy array) `H`.
+
+    Resource(β, H)
+
+Construct a resource with a Boltzmann distribution (at inverse temperature `β`) over the
+Hamiltonian `H`.
 """
 struct Resource
     p::Vector{Float64}
@@ -37,6 +42,7 @@ struct Resource
         new(p, H)
     end
 end
+Resource(β::Float64, H) = Resource(boltzmann(β, H), H)
 
 Base.size(r::Resource) = size(r.p)
 

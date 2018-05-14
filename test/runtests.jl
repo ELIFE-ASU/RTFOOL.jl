@@ -30,4 +30,24 @@ end
 
     @test size(Resource([1], [0])) == (1,)
     @test size(Resource([0.5, 0.25, 0.25], [0, 1, 2])) == (3,)
+
+    let r = Resource([0.1, 0.9], [1, 1e-1])
+        @test r.p ≈ [0.1, 0.9]
+        @test r.H ≈ [1, 1e-1]
+    end
+
+    let r = Resource([0.1, 0.5, 0.4], [1, 1e-1, 1e-2])
+        @test r.p ≈ [0.1, 0.5, 0.4]
+        @test r.H ≈ [1, 1e-1, 1e-2]
+    end
+
+    let r = Resource(2.0, [1, 10, 100])
+        @test r.p ≈ [e^-2, e^-20, e^-200] / (e^-2 + e^-20 + e^-200)
+        @test r.H ≈ [1, 10, 100]
+    end
+
+    let r = Resource(2.0, [1, 1, 2])
+        @test r.p ≈ [e^2, e^2, 1] / (1 + 2e^2)
+        @test r.H ≈ [1, 1, 2]
+    end
 end
