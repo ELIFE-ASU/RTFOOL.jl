@@ -51,6 +51,16 @@ end
         @test r.H ≈ [1, 1, 2]
     end
 
+    let r = Resource(1, [1,2])
+        @test r.p ≈ [1.0, 0.0]
+        @test r.H ≈ [1, 2]
+    end
+
+    let r = Resource(3, [2, 3, 3, 4])
+        @test r.p ≈ [0.0, 0.0, 1.0, 0.0]
+        @test r.H ≈ [2, 3, 3, 4]
+    end
+
     let a = Resource(0.25, [1,2]), b = Resource(0.25, [1,10]), c = Resource(0.25, [1,1,2])
         let aa = tensor((a,2)), H = [2, 3, 3, 4]
             @test length(aa) == 4
