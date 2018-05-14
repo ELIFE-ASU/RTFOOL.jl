@@ -38,4 +38,8 @@ struct Resource
     end
 end
 
+Base.size(r::Resource) = size(r.p)
+
+Base.length(r::Resource) = length(r.p)
+
 end

@@ -24,4 +24,10 @@ end
     @test_throws ArgumentError Resource([0.5], [0.0])
     @test_throws ArgumentError Resource([0.5, 0.25], [0.0, 1.0])
     @test_throws DimensionMismatch Resource([0.5, 0.5], [0.0])
+
+    @test length(Resource([1], [0])) == 1
+    @test length(Resource([0.5, 0.25, 0.25], [0, 1, 2])) == 3
+
+    @test size(Resource([1], [0])) == (1,)
+    @test size(Resource([0.5, 0.25, 0.25], [0, 1, 2])) == (3,)
 end
