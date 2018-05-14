@@ -10,4 +10,5 @@ DocTestSetup = :(using RTFOOL)
 ## Resources
 ```@docs
 Resource
+tensor
 ```
