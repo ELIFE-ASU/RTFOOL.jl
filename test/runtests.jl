@@ -50,4 +50,29 @@ end
         @test r.p ≈ [e^2, e^2, 1] / (1 + 2e^2)
         @test r.H ≈ [1, 1, 2]
     end
+
+    let a = Resource(0.25, [1,2]), b = Resource(0.25, [1,10]), c = Resource(0.25, [1,1,2])
+        let aa = tensor((a,2)), H = [2, 3, 3, 4]
+            @test length(aa) == 4
+            @test size(aa) == (4,)
+            @test aa.H == H
+            @test aa.p ≈ RTFOOL.boltzmann(0.25, H)
+        end
+
+        let ab = tensor((a,1), (b,2)), H = [3,12,12,21,4,13,13,22]
+            @test length(ab) == 8
+            @test size(ab) == (8,)
+            @test ab.H == H
+            @test ab.p ≈ RTFOOL.boltzmann(0.25, H)
+        end
+
+        let abc = tensor((a,1), (b,2), (c,1)),
+            H = [4, 4, 5, 13, 13, 14, 13, 13, 14, 22, 22, 23,
+                 5, 5, 6, 14, 14, 15, 14, 14, 15, 23, 23, 24]
+            @test length(abc) == 24
+            @test size(abc) == (24,)
+            @test abc.H == H
+            @test abc.p ≈ RTFOOL.boltzmann(0.25, H)
+        end
+    end
 end

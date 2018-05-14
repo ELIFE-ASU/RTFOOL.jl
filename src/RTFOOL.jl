@@ -1,6 +1,6 @@
 module RTFOOL
 
-export Resource
+export Resource, tensor
 
 """
     boltzmann(β, E::Number)
@@ -55,5 +55,39 @@ Resource(β::Float64, H) = Resource(boltzmann(β, H), H)
 Base.size(r::Resource) = size(r.p)
 
 Base.length(r::Resource) = length(r.p)
+
+function tensor(x::Tuple{Resource,Int}, xs::Tuple{Resource,Int}...)
+    size = mapreduce(t -> length(t[1])^t[2], *, length(x[1])^x[2], xs)
+
+    p = ones(size)
+    H = zeros(size)
+
+    stretch = size
+    let (r, n) = x
+        const m = length(r)
+        for j in 1:n
+            stretch ÷= m
+            for i in 0:size-1
+                k = (i ÷ stretch) % m
+                p[i+1] *= r.p[k+1]
+                H[i+1] += r.H[k+1]
+            end
+        end
+    end
+
+    for (r, n) in xs
+        const m = length(r)
+        for j in 1:n
+            stretch ÷= m
+            for i in 0:size-1
+                k = (i ÷ stretch) % m
+                p[i+1] *= r.p[k+1]
+                H[i+1] += r.H[k+1]
+            end
+        end
+    end
+
+    Resource(p, H)
+end
 
 end
