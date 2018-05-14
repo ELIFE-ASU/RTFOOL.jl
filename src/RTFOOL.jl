@@ -115,7 +115,7 @@ function pure_system(Hm, ms, Hw, ws)
     end 
 
     ms = map(*, 1:length(ms), ms)
-    if @views sum(ws[2:end]) < sum(ms[2:end])
+    if @views sum(ws[2:end]) < sum(ms[2:end]) - length(ms) + 1
         warn("""It is suggested that the number of associated water molecules be at least
 equal to the total number of bonds in the system""")
     end

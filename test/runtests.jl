@@ -98,10 +98,10 @@ end
                 @test r.p[1] == 1
             end
 
-            let (r, Nm, Nw) = pure_system(Hm, [1,1], Hw, [1,2])
+            let (r, Nm, Nw) = pure_system(Hm, [1,1], Hw, [1,1])
                 @test Nm == 3
-                @test Nw == 3
-                @test r.p[28] == 1
+                @test Nw == 2
+                @test r.p[14] == 1
             end
         end
     end
