@@ -5,5 +5,8 @@ else
     using Test
 end
 
-# write your own tests here
-@test 1 != 2
+@testset "Boltzmann" begin
+    @test RTFOOL.boltzmann(1.0, 1.0) == e^-1.00
+    @test RTFOOL.boltzmann(1.0, 2.0) == e^-2.00
+    @test RTFOOL.boltzmann(0.5, 1.5) == e^-0.75
+end
