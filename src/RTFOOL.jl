@@ -1,6 +1,6 @@
 module RTFOOL
 
-export Resource, tensor
+export Resource, tensor, pure_system
 export Context
 
 """
@@ -65,6 +65,68 @@ Resource(β::Float64, H) = Resource(boltzmann(β, H), H)
 Resource(i::Int, H) = let p = zeros(size(H))
     p[i] = 1.0
     Resource(p, H)
+end
+
+"""
+    pure_system(Hm, ms, Hw, ws)
+
+Construct a pure system from a collection of monomers and water molecules with Hamiltonians
+`Hm` and `Hw`, respectively. The number of free monomers, dimers, trimers, etc... are
+provided in `ms`, and `ws` provides the number of dissociated water molecules, and higher
+energy states.
+
+The result is a tuple of the from `(r, Nm, Nw)` where `r` is the constructed resource, `Nm`
+is the total number of monomers (bound or otherwise), and `Nw` is the total number of water
+molecules.
+
+```jldoctest
+julia> r, Nm, Nw = pure_system([0.1, 1.0], [0,1], [0.1, 1.0], [0,2]);
+
+julia> Nm, Nw
+(2, 2)
+
+julia> r.p
+16-element Array{Float64,1}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+ 1.0
+```
+"""
+function pure_system(Hm, ms, Hw, ws)
+    if length(Hm) != length(ms)
+        throw(DimensionMismatch("length(Hm) != length(ms)"))
+    elseif length(Hw) != length(ws)
+        throw(DimensionMismatch("length(Hw) != length(ws)"))
+    elseif ws[1] < ms[1]
+        throw(ArgumentError("too few dissocated water molecules given number of free monomers"))
+    end 
+
+    ms = map(*, 1:length(ms), ms)
+    if @views sum(ws[2:end]) < sum(ms[2:end])
+        warn("""It is suggested that the number of associated water molecules be at least
+equal to the total number of bonds in the system""")
+    end
+
+    monomers = map(z->(Resource(z[1], Hm), z[2]), enumerate(ms))
+    Nm = sum(ms)
+
+    waters = map(z -> (Resource(z[1], Hw), z[2]), enumerate(ws))
+    Nw = sum(ws)
+
+    tensor(monomers..., waters...), Nm, Nw
 end
 
 Base.size(r::Resource) = size(r.p)

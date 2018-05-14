@@ -11,6 +11,7 @@ DocTestSetup = :(using RTFOOL)
 ```@docs
 Resource
 tensor
+pure_system
 ```
 
 ## Context

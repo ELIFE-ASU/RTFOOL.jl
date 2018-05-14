@@ -85,6 +85,26 @@ end
             @test abc.p ≈ RTFOOL.boltzmann(0.25, H)
         end
     end
+
+    @testset "Pure System" begin
+        let Hm = [1, 10], Hw = [10, 20]
+            @test_throws DimensionMismatch pure_system(Hm, [1], Hw, [1,0])
+            @test_throws DimensionMismatch pure_system(Hm, [1,0], Hw, [1])
+            @test_throws ArgumentError pure_system(Hm, [2,0], Hw, [1,0])
+
+            let (r, Nm, Nw) = pure_system(Hm, [2,0], Hw, [2,0])
+                @test Nm == 2
+                @test Nw == 2
+                @test r.p[1] == 1
+            end
+
+            let (r, Nm, Nw) = pure_system(Hm, [1,1], Hw, [1,2])
+                @test Nm == 3
+                @test Nw == 3
+                @test r.p[28] == 1
+            end
+        end
+    end
 end
 
 @testset "Context" begin
