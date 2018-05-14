@@ -1,6 +1,7 @@
 module RTFOOL
 
 export Resource, tensor
+export Context
 
 """
     boltzmann(β, E::Number)
@@ -70,6 +71,8 @@ Base.size(r::Resource) = size(r.p)
 
 Base.length(r::Resource) = length(r.p)
 
+Base.isapprox(x::Resource, y::Resource) = x.p ≈ y.p && x.H ≈ y.H
+
 """
     tensor(x::Tuple{Resource,Int}, xs::Tuple{Resource,Int}...)
 
@@ -80,8 +83,7 @@ julia> tensor((Resource(0.25, [1,2]), 2))
 RTFOOL.Resource([0.316042, 0.246134, 0.246134, 0.191689], [2.0, 3.0, 3.0, 4.0])
 
 julia> tensor((Resource([0,1], [1,2]), 2), (Resource([0,1,0], [1,2,3]), 1))
-RTFOOL.Resource([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
-[3.0, 4.0, 5.0, 4.0, 5.0, 6.0, 4.0, 5.0, 6.0, 5.0, 6.0, 7.0])
+RTFOOL.Resource([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0], [3.0, 4.0, 5.0, 4.0, 5.0, 6.0, 4.0, 5.0, 6.0, 5.0, 6.0, 7.0])
 ```
 """
 function tensor(x::Tuple{Resource,Int}, xs::Tuple{Resource,Int}...)
@@ -116,6 +118,47 @@ function tensor(x::Tuple{Resource,Int}, xs::Tuple{Resource,Int}...)
     end
 
     Resource(p, H)
+end
+
+"""
+    Context(β, Hm, Nm, Hw, Nw)
+
+Construct a Context with a given inverse temperature `β`, and monomer and water Hamiltonians
+`Hm` and `Hw`, respectively. A bath is constructed with `Nm` monomers and `Nw` water
+molecules in Gibb's states.
+
+```jldoctest
+julia> ctx = Context(0.25, [1,2], 2, [2,3], 1);
+
+julia> ctx.β
+0.25
+
+julia> ctx.monomer
+RTFOOL.Resource([0.562177, 0.437823], [1.0, 2.0])
+
+julia> ctx.water
+RTFOOL.Resource([0.562177, 0.437823], [2.0, 3.0])
+
+julia> ctx.bath
+RTFOOL.Resource([0.177672, 0.138371, 0.138371, 0.107763, 0.138371, 0.107763, 0.107763, 0.0839261], [4.0, 5.0, 5.0, 6.0, 5.0, 6.0, 6.0, 7.0])
+```
+"""
+struct Context
+    β::Float64
+
+    monomer::Resource
+    water::Resource
+
+    bath::Resource
+    Nm::Int
+    Nw::Int
+
+    function Context(β, Hm, Nm, Hw, Nw)
+        monomer = Resource(β, Hm)
+        water = Resource(β, Hw)
+        bath = tensor((monomer, Nm), (water, Nw))
+        new(β, monomer, water, bath, Nm, Nw)
+    end
 end
 
 end

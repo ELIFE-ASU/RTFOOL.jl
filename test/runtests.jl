@@ -86,3 +86,15 @@ end
         end
     end
 end
+
+@testset "Context" begin
+    let β = 0.5, ctx = Context(β, [1,2], 2, [1,2,3], 1)
+        @test ctx.β == β
+        @test ctx.monomer ≈ Resource(β, [1,2])
+        @test ctx.water ≈ Resource(β, [1,2,3])
+        @test ctx.bath ≈ Resource(β, [3,4,5,4,5,6,4,5,6,5,6,7])
+        @test ctx.Nm == 2
+        @test ctx.Nw == 1
+    end
+
+end
