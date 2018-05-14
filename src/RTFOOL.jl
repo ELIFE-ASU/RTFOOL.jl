@@ -29,6 +29,14 @@ Construct a resource with state (probability array) `p` and Hamiltonian (energy 
 
 Construct a resource with a Boltzmann distribution (at inverse temperature `β`) over the
 Hamiltonian `H`.
+
+```jldoctest
+julia> Resource([0.1, 0.9], [1, 2])
+RTFOOL.Resource([0.1, 0.9], [1.0, 2.0])
+
+julia> Resource(0.5, [1, 2])
+RTFOOL.Resource([0.622459, 0.377541], [1.0, 2.0])
+```
 """
 struct Resource
     p::Vector{Float64}
