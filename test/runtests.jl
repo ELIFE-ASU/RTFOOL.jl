@@ -132,8 +132,8 @@ end
 
 @testset "Context" begin
     let β = 0.5, Hm = [1,2], Hw = [1,2,3],
-        system = pure_system(Hm, [0,1], Hw, [0,1,0])[1],
-        ctx = Context(β, Hm, 2, Hw, 1, system)
+        system = pure_system(Hm, [0,1], Hw, [0,1,0]),
+        ctx = Context(β, Hm, Hw, system...)
 
         @test ctx.β == β
 

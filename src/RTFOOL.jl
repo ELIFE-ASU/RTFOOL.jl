@@ -272,32 +272,33 @@ struct Context
     water::Resource
 
     bath::Resource
+    bath_bondage::Array{Float64,2}
     Nm::Int
     Nw::Int
 
     system::Resource
+    system_bondage::Array{Float64,2}
 
     H::Vector{Float64}
 
     deg::Dict{Int, Vector{Int}}
     num_swaps::Int
 
-    function Context(β, Hm, Nm, Hw, Nw, system)
+    function Context(β, Hm, Hw, system, bonds, Nm, Nw)
         monomer = Resource(β, Hm)
         water = Resource(β, Hw)
 
         bath = tensor((monomer, Nm), (water, Nw))
+        bath_bondage = bondage(Hm, Nm, Hw, Nw)
 
         H = kron(system.H, ones(bath.H)) + kron(ones(system.H), bath.H)
 
         deg, num_swaps = degeneracies(H)
 
-        new(β, monomer, water, bath, Nm, Nw, system, H, deg, num_swaps)
+        new(β, monomer, water, bath, bath_bondage, Nm, Nw, system, bonds, H, deg, num_swaps)
     end
 end
-Context(β, Hm, ms, Hw, ws) = let (system, _, Nm, Nw) = pure_system(Hm, ms, Hw, ws)
-    Context(β, Hm, Nm, Hw, Nw, system)
-end
+Context(β, Hm, ms, Hw, ws) = Context(β, Hm, Hw, pure_system(Hm, ms, Hw, ws)...)
 
 """
     randswap([rng=GLOBAL_RNG], ctx)
