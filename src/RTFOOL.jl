@@ -80,7 +80,7 @@ is the total number of monomers (bound or otherwise), and `Nw` is the total numb
 molecules.
 
 ```jldoctest
-julia> r, Nm, Nw = pure_system([0.1, 1.0], [0,1], [0.1, 1.0], [0,2]);
+julia> r, b, Nm, Nw = pure_system([0.1, 1.0], [0,1], [0.1, 1.0], [0,2]);
 
 julia> Nm, Nw
 (2, 2)
@@ -103,6 +103,11 @@ julia> r.p
  0.0
  0.0
  1.0
+
+julia> b
+2×16 Array{Float64,2}:
+ 0.0  0.0  0.0  0.0  0.5  0.5  0.5  0.5  …  0.5  0.5  0.5  1.0  1.0  1.0  1.0
+ 2.0  1.0  1.0  0.0  2.0  1.0  1.0  0.0     1.0  1.0  0.0  2.0  1.0  1.0  0.0
 ```
 """
 function pure_system(Hm, ms, Hw, ws)
@@ -113,6 +118,10 @@ function pure_system(Hm, ms, Hw, ws)
     elseif ws[1] < ms[1]
         throw(ArgumentError("too few dissocated water molecules given number of free monomers"))
     end 
+
+    # This needs to be done before the subsequent map operation as bondage does the map
+    # as well and the result would be `map(*, (1:length(ms)).^2, ms)`...
+    b = bondage(Hm, ms, Hw, ws)
 
     ms = map(*, 1:length(ms), ms)
     if @views sum(ws[2:end]) < sum(ms[2:end]) - length(ms) + 1
@@ -126,7 +135,9 @@ equal to the total number of bonds in the system""")
     waters = map(z -> (Resource(z[1], Hw), z[2]), enumerate(ws))
     Nw = sum(ws)
 
-    tensor(monomers..., waters...), Nm, Nw
+    s = tensor(monomers..., waters...)
+
+    s, b, Nm, Nw
 end
 
 Base.size(r::Resource) = size(r.p)
@@ -134,6 +145,43 @@ Base.size(r::Resource) = size(r.p)
 Base.length(r::Resource) = length(r.p)
 
 Base.isapprox(x::Resource, y::Resource) = x.p ≈ y.p && x.H ≈ y.H
+
+"""
+    bondage(Hm, ms, Hw, ws)
+
+Construct the bondage configuration for a system
+"""
+bondage(Hm, ms, Hw, ws) = bondage(Hm, dot(1:length(ms), ms), Hw, sum(ws))
+function bondage(Hm, Nm::Int, Hw, Nw::Int)
+    const Lm = length(Hm)
+    const Lw = length(Hw)
+    const N = Lm^Nm * Lw^Nw
+
+    b = zeros(Lm, N)
+
+    stretch = size(b, 2)
+    for j in 1:Nm
+        stretch ÷= Lm
+        for i in 0:size(b, 2)-1
+            k = (i ÷ stretch) % Lm
+            if k != 0
+                b[k, i+1] += k/(k+1)
+            end
+        end
+    end
+
+    for j in 1:Nw
+        stretch ÷= Lw
+        for i in 0:size(b, 2)-1
+            k = (i ÷ stretch) % Lw
+            if k == 0
+                b[end, i+1] += 1.0
+            end
+        end
+    end
+
+    b
+end
 
 """
     tensor(x::Tuple{Resource,Int}, xs::Tuple{Resource,Int}...)
@@ -247,7 +295,7 @@ struct Context
         new(β, monomer, water, bath, Nm, Nw, system, H, deg, num_swaps)
     end
 end
-Context(β, Hm, ms, Hw, ws) = let (system, Nm, Nw) = pure_system(Hm, ms, Hw, ws)
+Context(β, Hm, ms, Hw, ws) = let (system, _, Nm, Nw) = pure_system(Hm, ms, Hw, ws)
     Context(β, Hm, Nm, Hw, Nw, system)
 end
 

@@ -92,16 +92,22 @@ end
             @test_throws DimensionMismatch pure_system(Hm, [1,0], Hw, [1])
             @test_throws ArgumentError pure_system(Hm, [2,0], Hw, [1,0])
 
-            let (r, Nm, Nw) = pure_system(Hm, [2,0], Hw, [2,0])
+            let (r, bondage, Nm, Nw) = pure_system(Hm, [2,0], Hw, [2,0])
+                @test length(r) == 16
                 @test Nm == 2
                 @test Nw == 2
                 @test r.p[1] == 1
+                @test bondage == [0 0 0 0 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 1 1 1 1;
+                                  2 1 1 0 2   1   1   0   2   1   1   0   2 1 1 0]
             end
 
-            let (r, Nm, Nw) = pure_system(Hm, [1,1], Hw, [1,1])
+            let (r, bondage, Nm, Nw) = pure_system(Hm, [1,1], Hw, [1,1])
                 @test Nm == 3
                 @test Nw == 2
                 @test r.p[14] == 1
+                @test bondage ==
+    [0 0 0 0 .5 .5 .5 .5 .5 .5 .5 .5 1 1 1 1 .5 .5 .5 .5 1 1 1 1 1 1 1 1 1.5 1.5 1.5 1.5;
+     2 1 1 0  2  1  1  0  2  1  1  0 2 1 1 0  2  1  1  0 2 1 1 0 2 1 1 0 2   1   1   0]
             end
         end
     end
@@ -147,7 +153,7 @@ end
     end
 
     let β = 0.5, Hm = [1,2], Hw = [1,2,3], ms = [0,1], ws = [0,1,0],
-        (system, Nm, Nw) = pure_system(Hm, ms, Hw, ws),
+        (system, bondage, Nm, Nw) = pure_system(Hm, ms, Hw, ws),
         ctx = Context(β, Hm, ms, Hw, ws)
 
         @test ctx.β == β
