@@ -1,7 +1,7 @@
 module RTFOOL
 
 export Resource, tensor, pure_system
-export Context
+export Context, transform!
 
 """
     boltzmann(β, E::Number)
@@ -276,5 +276,23 @@ function randswap(rng::AbstractRNG, ctx::Context)
     end
 end
 randswap(ctx::Context) = randswap(Base.GLOBAL_RNG, ctx)
+
+"""
+    transform!([rng=GLOBAL_RNG], ctx::Context)
+
+Update the state of the system using a randomly selected swap.
+"""
+function transform!(rng::AbstractRNG, ctx::Context)
+    a, b = randswap(rng, ctx)
+
+    if (a,b) != (0,0)
+        p = kron(ctx.system.p, ctx.bath.p)
+        p[a], p[b] = p[b], p[a]
+        ctx.system.p[:] = sum(reshape(p, length(ctx.bath), length(ctx.system)), 1)
+    end
+
+    return ctx.system
+end
+transform!(ctx::Context) = transform!(Base.GLOBAL_RNG, ctx)
 
 end

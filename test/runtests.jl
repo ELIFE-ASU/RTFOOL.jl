@@ -175,4 +175,14 @@ end
             @test b == 0 || b in ctx.deg[a]
         end
     end
+
+    @testset "Transform" begin
+        let ctx = Context(2.7e-2, [1,2], [0,1], [1,5,7], [0,1,0]),
+                  rng = MersenneTwister(2018)
+            for _ in 1:1000
+                transform!(rng, ctx)
+            end
+            @test sum(ctx.system.p) ≈ 1.0
+        end
+    end
 end
