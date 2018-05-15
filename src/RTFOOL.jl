@@ -231,6 +231,9 @@ struct Context
 
     H::Vector{Float64}
 
+    deg::Dict{Int, Vector{Int}}
+    num_swaps::Int
+
     function Context(β, Hm, Nm, Hw, Nw, system)
         monomer = Resource(β, Hm)
         water = Resource(β, Hw)
@@ -239,7 +242,9 @@ struct Context
 
         H = kron(system.H, ones(bath.H)) + kron(ones(system.H), bath.H)
 
-        new(β, monomer, water, bath, Nm, Nw, system, H)
+        deg, num_swaps = degeneracies(H)
+
+        new(β, monomer, water, bath, Nm, Nw, system, H, deg, num_swaps)
     end
 end
 Context(β, Hm, ms, Hw, ws) = let (system, Nm, Nw) = pure_system(Hm, ms, Hw, ws)

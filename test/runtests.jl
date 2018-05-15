@@ -142,6 +142,8 @@ end
         @test length(ctx.H) == 144
         @test ctx.H[1] == 6
         @test ctx.H[end] == 14
+
+        @test ctx.num_swaps == 1802
     end
 
     let β = 0.5, Hm = [1,2], Hw = [1,2,3], ms = [0,1], ws = [0,1,0],
@@ -161,5 +163,7 @@ end
         @test length(ctx.H) == 144
         @test ctx.H[1] == 6
         @test ctx.H[end] == 14
+
+        @test ctx.num_swaps == 1802
     end
 end
