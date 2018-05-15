@@ -251,4 +251,30 @@ Context(β, Hm, ms, Hw, ws) = let (system, Nm, Nw) = pure_system(Hm, ms, Hw, ws)
     Context(β, Hm, Nm, Hw, Nw, system)
 end
 
+"""
+    randswap([rng=GLOBAL_RNG], ctx)
+
+Select a valid swap at random from the given context.
+"""
+function randswap(rng::AbstractRNG, ctx::Context)
+    n = rand(rng, 0:ctx.num_swaps)
+    if n == 0
+        (0, 0)
+    else
+        a, b = 0, 0
+        for (k, v) in ctx.deg
+            m = length(v)
+            if n > m
+                n -= m
+            else
+                a = k
+                b = v[n]
+                break
+            end
+        end
+        (a, b)
+    end
+end
+randswap(ctx::Context) = randswap(Base.GLOBAL_RNG, ctx)
+
 end

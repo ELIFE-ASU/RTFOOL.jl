@@ -166,4 +166,13 @@ end
 
         @test ctx.num_swaps == 1802
     end
+
+    let rng=MersenneTwister(2018), ctx = Context(0.5, [1,2], [0,1], [1,2], [0,1])
+        for _ in 1:1000
+            a, b = RTFOOL.randswap(ctx)
+            @test a < b || a == b == 0
+            @test a == 0 || haskey(ctx.deg, a)
+            @test b == 0 || b in ctx.deg[a]
+        end
+    end
 end
