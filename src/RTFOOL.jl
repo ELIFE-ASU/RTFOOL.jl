@@ -183,27 +183,9 @@ function tensor(x::Tuple{Resource,Int}, xs::Tuple{Resource,Int}...)
 end
 
 """
-    Context(β, Hm, Nm, Hw, Nw)
+    Context(β, Hm, Nm, Hw, Nw, system)
 
-Construct a Context with a given inverse temperature `β`, and monomer and water Hamiltonians
-`Hm` and `Hw`, respectively. A bath is constructed with `Nm` monomers and `Nw` water
-molecules in Gibb's states.
-
-```jldoctest
-julia> ctx = Context(0.25, [1,2], 2, [2,3], 1);
-
-julia> ctx.β
-0.25
-
-julia> ctx.monomer
-RTFOOL.Resource([0.562177, 0.437823], [1.0, 2.0])
-
-julia> ctx.water
-RTFOOL.Resource([0.562177, 0.437823], [2.0, 3.0])
-
-julia> ctx.bath
-RTFOOL.Resource([0.177672, 0.138371, 0.138371, 0.107763, 0.138371, 0.107763, 0.107763, 0.0839261], [4.0, 5.0, 5.0, 6.0, 5.0, 6.0, 6.0, 7.0])
-```
+    Context(β, Hm, ms, Ws, ws)
 """
 struct Context
     β::Float64
@@ -216,18 +198,18 @@ struct Context
     Nw::Int
 
     system::Resource
-    ms::Vector{Int}
-    ws::Vector{Int}
 
-    function Context(β, Hm, ms, Nm, Hw, ws, Nw)
+    function Context(β, Hm, Nm, Hw, Nw, system)
         monomer = Resource(β, Hm)
         water = Resource(β, Hw)
+
         bath = tensor((monomer, Nm), (water, Nw))
 
-        system, _, _ = pure_system(Hm, ms, Hw, ws)
-
-        new(β, monomer, water, bath, Nm, Nw, system, ms, ws)
+        new(β, monomer, water, bath, Nm, Nw, system)
     end
+end
+Context(β, Hm, ms, Hw, ws) = let (system, Nm, Nw) = pure_system(Hm, ms, Hw, ws)
+    Context(β, Hm, Nm, Hw, Nw, system)
 end
 
 end

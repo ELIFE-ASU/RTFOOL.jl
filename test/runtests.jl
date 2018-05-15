@@ -108,7 +108,10 @@ end
 end
 
 @testset "Context" begin
-    let β = 0.5, ctx = Context(β, [1,2], [0,1], 2, [1,2,3], [0,1,0], 1)
+    let β = 0.5, Hm = [1,2], Hw = [1,2,3],
+        system = pure_system(Hm, [0,1], Hw, [0,1,0])[1],
+        ctx = Context(β, Hm, 2, Hw, 1, system)
+
         @test ctx.β == β
 
         @test ctx.monomer ≈ Resource(β, [1,2])
@@ -118,9 +121,21 @@ end
         @test ctx.Nm == 2
         @test ctx.Nw == 1
 
-        @test ctx.system ≈ Resource([0,0,0,0,0,0,0,0,0,0,1,0],
-                                    [3,4,5,4,5,6,4,5,6,5,6,7])
-        @test ctx.ms == [0,1]
-        @test ctx.ws == [0,1,0]
+        @test ctx.system == ctx.system
+    end
+
+    let β = 0.5, Hm = [1,2], Hw = [1,2,3], ms = [0,1], ws = [0,1,0],
+        (system, Nm, Nw) = pure_system(Hm, ms, Hw, ws), ctx = Context(β, Hm, ms, Hw, ws)
+
+        @test ctx.β == β
+
+        @test ctx.monomer ≈ Resource(β, [1,2])
+        @test ctx.water ≈ Resource(β, [1,2,3])
+
+        @test ctx.bath ≈ Resource(β, [3,4,5,4,5,6,4,5,6,5,6,7])
+        @test ctx.Nm == Nm
+        @test ctx.Nw == Nw
+
+        @test ctx.system == ctx.system
     end
 end
