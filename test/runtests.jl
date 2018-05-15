@@ -107,6 +107,23 @@ end
     end
 end
 
+@testset "Degeneracies" begin
+    let (deg, num_swaps) = RTFOOL.degeneracies([2,3,3,4])
+        @test deg == Dict(2 => [3])
+        @test num_swaps == 1
+    end
+
+    let (deg, num_swaps) = RTFOOL.degeneracies([3,4,4,5,4,5,5,6])
+        @test deg == Dict(2 => [3,5], 3 => [5], 4 => [6,7], 6=>[7])
+        @test num_swaps == 6
+    end
+
+    let (deg, num_swaps) = RTFOOL.degeneracies(tensor((Resource([1,0], [1,2]),3)))
+        @test deg == Dict(2 => [3,5], 3 => [5], 4 => [6,7], 6=>[7])
+        @test num_swaps == 6
+    end
+end
+
 @testset "Context" begin
     let β = 0.5, Hm = [1,2], Hw = [1,2,3],
         system = pure_system(Hm, [0,1], Hw, [0,1,0])[1],

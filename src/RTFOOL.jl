@@ -183,6 +183,36 @@ function tensor(x::Tuple{Resource,Int}, xs::Tuple{Resource,Int}...)
 end
 
 """
+    degeneracies(H::AbstractArray)
+
+Construct an dictionary associating each state with the indicies of the states with whom it
+is degenerate. Each state is only associated with those who's indicies are greater than its
+own. The number of admissible swaps (excluding the identity) is also returned.
+
+    degeneracies(r::Resource)
+
+Construct the degeneracy dictionary given a resource.
+"""
+function degeneracies(H::AbstractArray)
+    num_swaps = 0
+    deg = Dict{Int, Vector{Int}}()
+    for i in 1:length(H)
+        for j in i+1:length(H)
+            if H[i] ≈ H[j]
+                num_swaps += 1
+                if haskey(deg, i)
+                    push!(deg[i], j)
+                else
+                    deg[i] = [j]
+                end
+            end
+        end
+    end
+    deg, num_swaps
+end
+degeneracies(r::Resource) = degeneracies(r.H)
+
+"""
     Context(β, Hm, Nm, Hw, Nw, system)
 
     Context(β, Hm, ms, Ws, ws)
