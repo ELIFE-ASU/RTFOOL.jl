@@ -199,13 +199,17 @@ struct Context
 
     system::Resource
 
+    H::Vector{Float64}
+
     function Context(β, Hm, Nm, Hw, Nw, system)
         monomer = Resource(β, Hm)
         water = Resource(β, Hw)
 
         bath = tensor((monomer, Nm), (water, Nw))
 
-        new(β, monomer, water, bath, Nm, Nw, system)
+        H = kron(system.H, ones(bath.H)) + kron(ones(system.H), bath.H)
+
+        new(β, monomer, water, bath, Nm, Nw, system, H)
     end
 end
 Context(β, Hm, ms, Hw, ws) = let (system, Nm, Nw) = pure_system(Hm, ms, Hw, ws)

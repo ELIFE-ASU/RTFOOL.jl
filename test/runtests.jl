@@ -122,10 +122,14 @@ end
         @test ctx.Nw == 1
 
         @test ctx.system == ctx.system
+        @test length(ctx.H) == 144
+        @test ctx.H[1] == 6
+        @test ctx.H[end] == 14
     end
 
     let β = 0.5, Hm = [1,2], Hw = [1,2,3], ms = [0,1], ws = [0,1,0],
-        (system, Nm, Nw) = pure_system(Hm, ms, Hw, ws), ctx = Context(β, Hm, ms, Hw, ws)
+        (system, Nm, Nw) = pure_system(Hm, ms, Hw, ws),
+        ctx = Context(β, Hm, ms, Hw, ws)
 
         @test ctx.β == β
 
@@ -137,5 +141,8 @@ end
         @test ctx.Nw == Nw
 
         @test ctx.system == ctx.system
+        @test length(ctx.H) == 144
+        @test ctx.H[1] == 6
+        @test ctx.H[end] == 14
     end
 end
