@@ -230,6 +230,10 @@ function tensor(x::Tuple{Resource,Int}, xs::Tuple{Resource,Int}...)
     Resource(p, H)
 end
 
+isintegral(x::Integer) = true
+isintegral(x::Real) = (floor(x) == x)
+isintegral(x::AbstractArray) = all(isintegral, x)
+
 """
     degeneracies(H::AbstractArray)
 
@@ -241,24 +245,36 @@ own. The number of admissible swaps (excluding the identity) is also returned.
 
 Construct the degeneracy dictionary given a resource.
 """
-function degeneracies(H::AbstractArray)
+function degeneracies(H::AbstractArray, b1::Array{Float64,2}, b2::Array{Float64,2})
     num_swaps = 0
+
     deg = Dict{Int, Vector{Int}}()
     for i in 1:length(H)
-        for j in i+1:length(H)
-            if H[i] ≈ H[j]
-                num_swaps += 1
-                if haskey(deg, i)
-                    push!(deg[i], j)
-                else
-                    deg[i] = [j]
+        b = 1 + (i-1) % size(b2, 2)
+        a = 1 + (i-1) ÷ size(b2, 2)
+
+        if @views isintegral(b1[:,b]) && isintegral(b2[:,a])
+            for j in i+1:length(H)
+                v = 1 + (j-1) % size(b2, 2)
+                u = 1 + (j-1) ÷ size(b2, 2)
+
+                if H[i] ≈ H[j]
+                    if @views sum(b1[:,b]) == sum(b1[:,v]) && sum(b2[:,a]) == sum(b2[:,u])
+
+                        num_swaps += 1
+                        if haskey(deg, i)
+                            push!(deg[i], j)
+                        else
+                            deg[i] = [j]
+                        end
+                    end
                 end
             end
         end
     end
     deg, num_swaps
 end
-degeneracies(r::Resource) = degeneracies(r.H)
+degeneracies(r::Resource, b1, bs2) = degeneracies(r.H, b1, b2)
 
 """
     Context(β, Hm, Nm, Hw, Nw, system)
@@ -293,7 +309,7 @@ struct Context
 
         H = kron(system.H, ones(bath.H)) + kron(ones(system.H), bath.H)
 
-        deg, num_swaps = degeneracies(H)
+        deg, num_swaps = degeneracies(H, bonds, bath_bondage)
 
         new(β, monomer, water, bath, bath_bondage, Nm, Nw, system, bonds, H, deg, num_swaps)
     end

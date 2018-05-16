@@ -113,22 +113,22 @@ end
     end
 end
 
-@testset "Degeneracies" begin
-    let (deg, num_swaps) = RTFOOL.degeneracies([2,3,3,4])
-        @test deg == Dict(2 => [3])
-        @test num_swaps == 1
-    end
-
-    let (deg, num_swaps) = RTFOOL.degeneracies([3,4,4,5,4,5,5,6])
-        @test deg == Dict(2 => [3,5], 3 => [5], 4 => [6,7], 6=>[7])
-        @test num_swaps == 6
-    end
-
-    let (deg, num_swaps) = RTFOOL.degeneracies(tensor((Resource([1,0], [1,2]),3)))
-        @test deg == Dict(2 => [3,5], 3 => [5], 4 => [6,7], 6=>[7])
-        @test num_swaps == 6
-    end
-end
+#  @testset "Degeneracies" begin
+#      let (deg, num_swaps) = RTFOOL.degeneracies([2,3,3,4])
+#          @test deg == Dict(2 => [3])
+#          @test num_swaps == 1
+#      end
+#
+#      let (deg, num_swaps) = RTFOOL.degeneracies([3,4,4,5,4,5,5,6])
+#          @test deg == Dict(2 => [3,5], 3 => [5], 4 => [6,7], 6=>[7])
+#          @test num_swaps == 6
+#      end
+#
+#      let (deg, num_swaps) = RTFOOL.degeneracies(tensor((Resource([1,0], [1,2]),3)))
+#          @test deg == Dict(2 => [3,5], 3 => [5], 4 => [6,7], 6=>[7])
+#          @test num_swaps == 6
+#      end
+#  end
 
 @testset "Context" begin
     let β = 0.5, Hm = [1,2], Hw = [1,2,3],
@@ -149,28 +149,29 @@ end
         @test ctx.H[1] == 6
         @test ctx.H[end] == 14
 
-        @test ctx.num_swaps == 1802
+        @test ctx.num_swaps == 6
+
     end
 
-    let β = 0.5, Hm = [1,2], Hw = [1,2,3], ms = [0,1], ws = [0,1,0],
+    let β = 0.5, Hm = [1,10], Hw = [3,5,7], ms = [0,1], ws = [0,1,0],
         (system, bondage, Nm, Nw) = pure_system(Hm, ms, Hw, ws),
         ctx = Context(β, Hm, ms, Hw, ws)
 
         @test ctx.β == β
 
-        @test ctx.monomer ≈ Resource(β, [1,2])
-        @test ctx.water ≈ Resource(β, [1,2,3])
+        @test ctx.monomer ≈ Resource(β, [1,10])
+        @test ctx.water ≈ Resource(β, [3,5,7])
 
-        @test ctx.bath ≈ Resource(β, [3,4,5,4,5,6,4,5,6,5,6,7])
+        @test ctx.bath ≈ Resource(β, [5,7,9,14,16,18,14,16,18,23,25,27])
         @test ctx.Nm == Nm
         @test ctx.Nw == Nw
 
         @test ctx.system == ctx.system
         @test length(ctx.H) == 144
-        @test ctx.H[1] == 6
-        @test ctx.H[end] == 14
+        @test ctx.H[1] == 10
+        @test ctx.H[end] == 54
 
-        @test ctx.num_swaps == 1802
+        @test ctx.num_swaps == 6
     end
 
     let rng=MersenneTwister(2018), ctx = Context(0.5, [1,2], [0,1], [1,2], [0,1])
@@ -184,11 +185,29 @@ end
 
     @testset "Transform" begin
         let ctx = Context(2.7e-2, [1,2], [0,1], [1,5,7], [0,1,0]),
-                  rng = MersenneTwister(2018)
-            for _ in 1:1000
+            rng = MersenneTwister(2018)
+            for _ in 1:500
                 transform!(rng, ctx)
             end
-            @test sum(ctx.system.p) ≈ 1.0
+            let expect = copy(ctx.bath.p)
+                expect[ctx.system.p .== 0.0] = 0.0
+                expect /= sum(expect)
+                @test ctx.system.p ≈ expect
+                @test sum(ctx.system.p) ≈ 1.0
+            end
+        end
+
+        let ctx = Context(2.7e-2, [1,10], [0,1], [1,1e-1], [0,1])
+            rng = MersenneTwister(2018)
+            for _ in 1:200
+                transform!(rng, ctx)
+            end
+            let expect = copy(ctx.bath.p)
+                expect[ctx.system.p .== 0.0] = 0.0
+                expect /= sum(expect)
+                @test ctx.system.p ≈ expect
+                @test sum(ctx.system.p) ≈ 1.0
+            end
         end
     end
 end
