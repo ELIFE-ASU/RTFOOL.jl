@@ -10,11 +10,4 @@ DocTestSetup = :(using RTFOOL)
 ## Resources
 ```@docs
 Resource
-pure_system
-```
-
-## Context
-```@docs
-Context
-transform!
 ```
