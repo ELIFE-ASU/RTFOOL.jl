@@ -1,6 +1,6 @@
 module RTFOOL
 
-export Resource, tensor, pure_system
+export Resource, pure_system
 export Context, transform!
 
 """
@@ -183,19 +183,6 @@ function bondage(Hm, Nm::Int, Hw, Nw::Int)
     b
 end
 
-"""
-    tensor(x::Tuple{Resource,Int}, xs::Tuple{Resource,Int}...)
-
-Construct the tensor product of resources.
-
-```jldoctest
-julia> tensor((Resource(0.25, [1,2]), 2))
-RTFOOL.Resource([0.316042, 0.246134, 0.246134, 0.191689], [2.0, 3.0, 3.0, 4.0])
-
-julia> tensor((Resource([0,1], [1,2]), 2), (Resource([0,1,0], [1,2,3]), 1))
-RTFOOL.Resource([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0], [3.0, 4.0, 5.0, 4.0, 5.0, 6.0, 4.0, 5.0, 6.0, 5.0, 6.0, 7.0])
-```
-"""
 function tensor(x::Tuple{Resource,Int}, xs::Tuple{Resource,Int}...)
     size = mapreduce(t -> length(t[1])^t[2], *, length(x[1])^x[2], xs)
 

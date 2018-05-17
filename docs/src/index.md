@@ -10,7 +10,6 @@ DocTestSetup = :(using RTFOOL)
 ## Resources
 ```@docs
 Resource
-tensor
 pure_system
 ```
 

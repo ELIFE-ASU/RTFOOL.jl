@@ -62,21 +62,21 @@ end
     end
 
     let a = Resource(0.25, [1,2]), b = Resource(0.25, [1,10]), c = Resource(0.25, [1,1,2])
-        let aa = tensor((a,2)), H = [2, 3, 3, 4]
+        let aa = RTFOOL.tensor((a,2)), H = [2, 3, 3, 4]
             @test length(aa) == 4
             @test size(aa) == (4,)
             @test aa.H == H
             @test aa.p ≈ RTFOOL.boltzmann(0.25, H)
         end
 
-        let ab = tensor((a,1), (b,2)), H = [3,12,12,21,4,13,13,22]
+        let ab = RTFOOL.tensor((a,1), (b,2)), H = [3,12,12,21,4,13,13,22]
             @test length(ab) == 8
             @test size(ab) == (8,)
             @test ab.H == H
             @test ab.p ≈ RTFOOL.boltzmann(0.25, H)
         end
 
-        let abc = tensor((a,1), (b,2), (c,1)),
+        let abc = RTFOOL.tensor((a,1), (b,2), (c,1)),
             H = [4, 4, 5, 13, 13, 14, 13, 13, 14, 22, 22, 23,
                  5, 5, 6, 14, 14, 15, 14, 14, 15, 23, 23, 24]
             @test length(abc) == 24
@@ -124,7 +124,7 @@ end
 #          @test num_swaps == 6
 #      end
 #
-#      let (deg, num_swaps) = RTFOOL.degeneracies(tensor((Resource([1,0], [1,2]),3)))
+#      let (deg, num_swaps) = RTFOOL.degeneracies(RTFOOL.tensor((Resource([1,0], [1,2]),3)))
 #          @test deg == Dict(2 => [3,5], 3 => [5], 4 => [6,7], 6=>[7])
 #          @test num_swaps == 6
 #      end
