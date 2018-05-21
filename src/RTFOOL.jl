@@ -1,6 +1,8 @@
 module RTFOOL
 
-export Resource
+using Combinatorics, DataStructures
+
+export Resource, subspace
 
 """
     boltzmann(β, E::Number)
@@ -71,5 +73,44 @@ Base.size(r::Resource) = size(r.p)
 Base.length(r::Resource) = length(r.p)
 
 Base.isapprox(x::Resource, y::Resource) = x.p ≈ y.p && x.H ≈ y.H
+
+function subspace(Hm, Nm)
+    const Lm = length(Hm)
+    if Lm < 2
+        throw(ArgumentError("monomer Hamiltonian is too short $Lm < 2"))
+    elseif Nm < 1
+        throw(ArgumentError("space has too few monomers $Nm < 2"))
+    end
+
+    basis, energy, degeneracy = NTuple{Nm,Int}[], Float64[], Int[]
+
+    state = Array{Int}(Nm)
+    for partition in Combinatorics.IntegerPartitions(Nm)
+        if maximum(partition) <= Lm
+            i = 1
+            for n in partition
+                for _ in 1:n
+                    state[i] = n
+                    i += 1
+                end
+            end
+
+            push!(basis, tuple(state...))
+            push!(energy, mapreduce(n -> n*Hm[n], +, partition))
+
+            deg = factorial(BigInt(Nm))
+            for (n, a) in counter(partition)
+                deg /= factorial(BigInt(a))
+                if n != 1
+                    deg /= 2^a
+                end
+            end
+
+            push!(degeneracy, Int(deg))
+        end
+    end
+
+    basis, energy, degeneracy
+end
 
 end

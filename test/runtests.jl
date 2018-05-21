@@ -5,6 +5,9 @@ else
     using Test
 end
 
+re(p,q) = sum(map((p,q) -> (p != zero(p)) ? p*log(p/q) : 0.0, p, q))
+entropy(p) = -dot(p, map(p -> (p != zero(p)) ? log(p) : 0.0, p))
+
 @testset "Boltzmann" begin
     @test RTFOOL.boltzmann(1.0, 1.0) == e^-1.00
     @test RTFOOL.boltzmann(1.0, 2.0) == e^-2.00
@@ -59,5 +62,42 @@ end
     let r = Resource(3, [2, 3, 3, 4])
         @test r.p ≈ [0.0, 0.0, 1.0, 0.0]
         @test r.H ≈ [2, 3, 3, 4]
+    end
+end
+
+@testset "Subspace" begin
+    @test_throws ArgumentError subspace([0], 1)
+    @test_throws ArgumentError subspace([1,2], -1)
+    @test_throws ArgumentError subspace([1,2], 0)
+
+    let (basis, energy, deg) = subspace([1,2], 1)
+        @test basis == [(1,)]
+        @test energy ≈ [1]
+        @test deg == [1]
+    end
+
+    let (basis, energy, deg) = subspace([1,2], 3)
+        @test basis == [(2,2,1), (1,1,1)]
+        @test energy ≈ [5, 3]
+        @test deg == [3, 1]
+    end
+
+    let (basis, energy, deg) = subspace([1,2,3], 3)
+        @test basis == [(3,3,3), (2,2,1), (1,1,1)]
+        @test energy ≈ [9, 5, 3]
+        @test deg == [3, 3, 1]
+    end
+
+    let (basis, energy, deg) = subspace([1,2,3,4], 4)
+        @test basis == [(4,4,4,4), (3,3,3,1), (2,2,2,2), (2,2,1,1), (1,1,1,1)]
+        @test energy ≈ [16, 10, 8, 6, 4]
+        @test deg == [12, 12, 3, 6, 1]
+    end
+
+    let (basis, energy, deg) = subspace([1,2,3,4,5], 5)
+        @test basis == [(5,5,5,5,5), (4,4,4,4,1), (3,3,3,2,2), (3,3,3,1,1), (2,2,2,2,1),
+                        (2,2,1,1,1), (1,1,1,1,1)]
+        @test energy ≈ [25, 17, 13, 11, 9, 7, 5]
+        @test deg == [60, 60, 30, 30, 15, 10, 1]
     end
 end
