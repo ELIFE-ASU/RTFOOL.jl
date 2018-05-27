@@ -74,12 +74,16 @@ Base.length(r::Resource) = length(r.p)
 
 Base.isapprox(x::Resource, y::Resource) = x.p ≈ y.p && x.H ≈ y.H
 
-function subspace(Hm, Nm)
-    const Lm = length(Hm)
+function subspace(Hm, Nm, Hw, Nw)
+    const Lm, Lw = length(Hm), length(Hw)
     if Lm < 2
-        throw(ArgumentError("monomer Hamiltonian is too short $Lm < 2"))
+        throw(ArgumentError("monomer Hamiltonian is too short"))
+    elseif Lw < 2
+        throw(ArgumentError("water Hamiltonian is too short"))
     elseif Nm < 1
-        throw(ArgumentError("space has too few monomers $Nm < 2"))
+        throw(ArgumentError("space has too few monomers"))
+    elseif Nw < Nm
+        throw(ArgumentError("space has fewer water molecules than monomers"))
     end
 
     basis, energy, degeneracy = NTuple{Nm,Int}[], Float64[], Int[]
