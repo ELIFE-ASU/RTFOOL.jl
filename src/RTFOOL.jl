@@ -98,10 +98,17 @@ function subspace(Hm, Nm, Hw, Nw)
                     i += 1
                 end
             end
+
+            menergy = mapreduce(n -> n*Hm[n], +, partition)
+
             t = length(partition)
             state[i:end-t] = Lw
             state[end-t+1:end] = 1
             push!(basis, tuple(state...))
+
+            wenergy = sum(@view Hw[state[i:end]])
+            push!(energy, menergy + wenergy)
+
             while state[i] != 1
                 for j in (length(state)-t):-1:i
                     if state[j] != 1
@@ -112,7 +119,8 @@ function subspace(Hm, Nm, Hw, Nw)
                 end
                 push!(basis, tuple(state...))
 
-                #  push!(energy, mapreduce(n -> n*Hm[n], +, partition))
+                wenergy = sum(@view Hw[state[i:end]])
+                push!(energy, menergy + wenergy)
 
                 #  deg = factorial(BigInt(Nm))
                 #  for (n, a) in counter(partition)
