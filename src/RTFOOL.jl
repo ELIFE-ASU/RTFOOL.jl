@@ -86,9 +86,9 @@ function subspace(Hm, Nm, Hw, Nw)
         throw(ArgumentError("space has fewer water molecules than monomers"))
     end
 
-    basis, energy, degeneracy = NTuple{Nm,Int}[], Float64[], Int[]
+    basis, energy, degeneracy = NTuple{Nm + Nw,Int}[], Float64[], Int[]
 
-    state = Array{Int}(Nm)
+    state = Array{Int}(Nm + Nw)
     for partition in Combinatorics.IntegerPartitions(Nm)
         if maximum(partition) <= Lm
             i = 1
@@ -98,19 +98,32 @@ function subspace(Hm, Nm, Hw, Nw)
                     i += 1
                 end
             end
-
+            t = length(partition)
+            state[i:end-t] = Lw
+            state[end-t+1:end] = 1
             push!(basis, tuple(state...))
-            push!(energy, mapreduce(n -> n*Hm[n], +, partition))
-
-            deg = factorial(BigInt(Nm))
-            for (n, a) in counter(partition)
-                deg /= factorial(BigInt(a))
-                if n != 1
-                    deg /= 2^a
+            while state[i] != 1
+                for j in (length(state)-t):-1:i
+                    if state[j] != 1
+                        state[j] -= 1
+                        state[j+1:length(state)-t] = state[j]
+                        break
+                    end
                 end
-            end
+                push!(basis, tuple(state...))
 
-            push!(degeneracy, Int(deg))
+                #  push!(energy, mapreduce(n -> n*Hm[n], +, partition))
+
+                #  deg = factorial(BigInt(Nm))
+                #  for (n, a) in counter(partition)
+                #      deg /= factorial(BigInt(a))
+                #      if n != 1
+                #          deg /= 2^a
+                #      end
+                #  end
+
+                #  push!(degeneracy, Int(deg))
+            end
         end
     end
 
