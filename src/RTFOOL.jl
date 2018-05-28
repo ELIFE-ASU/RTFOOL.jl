@@ -76,6 +76,7 @@ Base.isapprox(x::Resource, y::Resource) = x.p ≈ y.p && x.H ≈ y.H
 
 function subspace(Hm, Nm, Hw, Nw)
     const Lm, Lw = length(Hm), length(Hw)
+
     if Lm < 2
         throw(ArgumentError("monomer Hamiltonian is too short"))
     elseif Lw < 2
@@ -85,6 +86,8 @@ function subspace(Hm, Nm, Hw, Nw)
     elseif Nw < Nm
         throw(ArgumentError("space has fewer water molecules than monomers"))
     end
+
+    const Nmf, Nwf = factorial(Nm), factorial(Nw)
 
     basis, energy, degeneracy = NTuple{Nm + Nw,Int}[], Float64[], Int[]
 
@@ -100,6 +103,13 @@ function subspace(Hm, Nm, Hw, Nw)
             end
 
             menergy = mapreduce(n -> n*Hm[n], +, partition)
+            mdeg = Nmf
+            for (n, a) in counter(partition)
+                mdeg /= factorial(BigInt(a))
+                if n != 1
+                    mdeg /= 2^a
+                end
+            end
 
             t = length(partition)
             state[i:end-t] = Lw
@@ -108,6 +118,12 @@ function subspace(Hm, Nm, Hw, Nw)
 
             wenergy = sum(@view Hw[state[i:end]])
             push!(energy, menergy + wenergy)
+
+            wdeg = Nwf
+            for (n, a) in counter(@view state[i:end])
+                wdeg /= factorial(BigInt(a))
+            end
+            push!(degeneracy, Int(mdeg * wdeg))
 
             while state[i] != 1
                 for j in (length(state)-t):-1:i
@@ -122,15 +138,11 @@ function subspace(Hm, Nm, Hw, Nw)
                 wenergy = sum(@view Hw[state[i:end]])
                 push!(energy, menergy + wenergy)
 
-                #  deg = factorial(BigInt(Nm))
-                #  for (n, a) in counter(partition)
-                #      deg /= factorial(BigInt(a))
-                #      if n != 1
-                #          deg /= 2^a
-                #      end
-                #  end
-
-                #  push!(degeneracy, Int(deg))
+                wdeg = Nwf
+                for (n, a) in counter(@view state[i:end])
+                    wdeg /= factorial(BigInt(a))
+                end
+                push!(degeneracy, Int(mdeg * wdeg))
             end
         end
     end
