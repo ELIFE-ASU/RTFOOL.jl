@@ -125,9 +125,9 @@ function subspace(Hm, Nm, Hw, Nw)
             end
             push!(degeneracy, Int(mdeg * wdeg))
 
-            while state[i] != 1
+            while state[i] > 2
                 for j in (length(state)-t):-1:i
-                    if state[j] != 1
+                    if state[j] > 2
                         state[j] -= 1
                         state[j+1:length(state)-t] = state[j]
                         break
