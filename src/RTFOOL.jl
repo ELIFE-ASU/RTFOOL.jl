@@ -89,9 +89,9 @@ function subspace(Hm, Nm, Hw, Nw)
         throw(ArgumentError("space has fewer water molecules than monomers"))
     end
 
-    const Nmf, Nwf = factorial(Nm), factorial(Nw)
+    const Nmf, Nwf = factorial(BigInt(Nm)), factorial(BigInt(Nw))
 
-    basis, energy, degeneracy = NTuple{Nm + Nw,Int}[], Float64[], Int[]
+    basis, energy, degeneracy = NTuple{Nm + Nw, Int}[], Float64[], BigInt[]
 
     state = Array{Int}(Nm + Nw)
     for partition in Combinatorics.IntegerPartitions(Nm)
@@ -123,9 +123,9 @@ function subspace(Hm, Nm, Hw, Nw)
 
             wdeg = Nwf
             for (n, a) in counter(@view state[i:end])
-                wdeg /= factorial(BigInt(a))
+                wdeg ÷= factorial(BigInt(a))
             end
-            push!(degeneracy, Int(mdeg * wdeg))
+            push!(degeneracy, mdeg * wdeg)
 
             while state[i] > 2
                 for j in (length(state)-t):-1:i
@@ -142,9 +142,9 @@ function subspace(Hm, Nm, Hw, Nw)
 
                 wdeg = Nwf
                 for (n, a) in counter(@view state[i:end])
-                    wdeg /= factorial(BigInt(a))
+                    wdeg ÷= factorial(BigInt(a))
                 end
-                push!(degeneracy, Int(mdeg * wdeg))
+                push!(degeneracy, mdeg * wdeg)
             end
         end
     end
