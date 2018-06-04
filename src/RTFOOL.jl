@@ -1,3 +1,5 @@
+__precompile__(true)
+
 module RTFOOL
 
 using Combinatorics, DataStructures
