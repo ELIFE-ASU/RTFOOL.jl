@@ -4,7 +4,7 @@ module RTFOOL
 
 using Combinatorics, DataStructures
 
-export Resource, subspace
+export Resource, StateSpace
 
 """
     boltzmann(β, E::Number)
@@ -82,7 +82,13 @@ Base.length(r::Resource) = length(r.p)
 
 Base.isapprox(x::Resource, y::Resource) = x.p ≈ y.p && x.H ≈ y.H
 
-function subspace(Hm, Nm, Hw, Nw)
+struct StateSpace{N}
+    basis :: Vector{NTuple{N, Int}}
+    energy :: Vector{Float64}
+    deg :: Vector{BigInt}
+end
+
+function StateSpace(Hm, Nm, Hw, Nw)
     const Lm, Lw = length(Hm), length(Hw)
 
     if Lm < 2
@@ -155,7 +161,7 @@ function subspace(Hm, Nm, Hw, Nw)
         end
     end
 
-    basis, energy, degeneracy
+    StateSpace{Nm + Nw}(basis, energy, degeneracy)
 end
 
 end
