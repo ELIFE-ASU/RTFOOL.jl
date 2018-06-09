@@ -24,6 +24,12 @@ function boltzmann(β, E)
     factors ./ partition
 end
 
+function boltzmann(β, E, deg)
+    factors = map(*, boltzmann.(β, E), deg)
+    partition = sum(factors)
+    factors ./ partition
+end
+
 """
     Resource(p, H)
 

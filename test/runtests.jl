@@ -20,6 +20,14 @@ entropy(p) = -dot(p, map(p -> (p != zero(p)) ? log(p) : 0.0, p))
     @test RTFOOL.boltzmann(0.5, [0.5, 1.5]) ≈ [e/(e + √e), √e/(e + √e)]
     @test RTFOOL.boltzmann(1/3, [1, 2, 3]) ==
         [e^-(1/3), e^-(2/3), e^-1] / (e^-(1/3) + e^-(2/3) + e^-1)
+
+    @test RTFOOL.boltzmann(1.0, [1.0], [2]) == [1.0]
+    @test RTFOOL.boltzmann(1.0, [2.0], [3]) == [1.0]
+    @test RTFOOL.boltzmann(2.0, [1.0, 1.0], [1, 2]) == [1.0/3, 2.0/3]
+    @test RTFOOL.boltzmann(1.0, [1.0, 2.0], [2, 1]) == [2e/(1+2e), 1/(1+2e)]
+    @test RTFOOL.boltzmann(0.5, [0.5, 1.5], [2, 3]) ≈ [2e/(2e + 3*√e), 3*√e/(2e + 3*√e)]
+    @test RTFOOL.boltzmann(1/3, [1, 2, 3], [1, 2, 3]) ==
+	[e^-(1/3), 2e^-(2/3), 3e^-1] / (e^-(1/3) + 2e^-(2/3) + 3e^-1)
 end
 
 @testset "Resources" begin
