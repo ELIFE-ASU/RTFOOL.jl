@@ -6,30 +6,6 @@ using Combinatorics, DataStructures
 
 export Resource, StateSpace
 
-"""
-    boltzmann(β, E::Number)
-
-Compute the Boltzmann factor for inverse temperature `β` and energy `E`.
-
-    boltzmann(β, E)
-
-Construct the Boltzmann distributions with inverse temperature `β` over the energy states
-`E`.
-"""
-boltzmann(β, E::Number) = exp(-β*E)
-
-function boltzmann(β, E)
-    factors = boltzmann.(β, E)
-    partition = sum(factors)
-    factors ./ partition
-end
-
-function boltzmann(β, E, deg)
-    factors = map(*, boltzmann.(β, E), deg)
-    partition = sum(factors)
-    factors ./ partition
-end
-
 struct StateSpace{N}
     basis :: Vector{NTuple{N, Int}}
     energy :: Vector{Float64}
@@ -111,5 +87,21 @@ function StateSpace(Hm, Nm, Hw, Nw)
 
     StateSpace{Nm + Nw}(basis, energy, degeneracy)
 end
+
+boltzmann(β, E::Number) = exp(-β*E)
+
+function boltzmann(β, E)
+    factors = boltzmann.(β, E)
+    partition = sum(factors)
+    factors ./ partition
+end
+
+function boltzmann(β, E, deg)
+    factors = map(*, boltzmann.(β, E), deg)
+    partition = sum(factors)
+    convert(Array{Float64}, factors ./ partition)
+end
+
+boltzmann(β, space::StateSpace) = boltzmann(β, space.energy, space.deg)
 
 end
