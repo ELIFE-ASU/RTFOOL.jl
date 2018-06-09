@@ -50,7 +50,7 @@ entropy(p) = -dot(p, map(p -> (p != zero(p)) ? log(p) : 0.0, p))
     end
 end
 
-@testset "Subspace" begin
+@testset "StateSpace" begin
     @test_throws ArgumentError StateSpace([0], 1, [0.1, 1], 1)
     @test_throws ArgumentError StateSpace([1,2], -1, [0.1, 1], 1)
     @test_throws ArgumentError StateSpace([1,2], 0, [0.1, 1], 1)
