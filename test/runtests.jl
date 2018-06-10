@@ -154,3 +154,16 @@ end
         @test space.deg == [300, 600, 300, 300, 150, 50, 1]
     end
 end
+
+@testset "Context" begin
+    let space = StateSpace([1,2], 2, [0.1, 1.0], 2)
+        ctx = Context(0.5, space, [0,1])
+        @test ctx.β == 0.5
+        @test ctx.system_space === space
+        @test ctx.system_state == [0,1]
+        @test ctx.bath_space == space
+        let a = e^-2.55, b = e^-1.1
+            @test ctx.bath_state ≈ [2a/(2a + b), b/(2a + b)]
+        end
+    end
+end
