@@ -5,7 +5,7 @@ else
     using Test
 end
 
-re(p,q) = sum(map((p,q) -> (p != zero(p)) ? p*log(p/q) : 0.0, p, q))
+re(p, q) = sum(map((p,q) -> (p != zero(p)) ? p*log(p/q) : zero(p), p, q))
 entropy(p) = -dot(p, map(p -> (p != zero(p)) ? log(p) : 0.0, p))
 
 @testset "Boltzmann" begin
@@ -27,7 +27,7 @@ entropy(p) = -dot(p, map(p -> (p != zero(p)) ? log(p) : 0.0, p))
     @test RTFOOL.boltzmann(1.0, [1.0, 2.0], [2, 1]) == [2e/(1+2e), 1/(1+2e)]
     @test RTFOOL.boltzmann(0.5, [0.5, 1.5], [2, 3]) ≈ [2e/(2e + 3*√e), 3*√e/(2e + 3*√e)]
     @test RTFOOL.boltzmann(1/3, [1, 2, 3], [1, 2, 3]) ==
-	[e^-(1/3), 2e^-(2/3), 3e^-1] / (e^-(1/3) + 2e^-(2/3) + 3e^-1)
+        [e^-(1/3), 2e^-(2/3), 3e^-1] / (e^-(1/3) + 2e^-(2/3) + 3e^-1)
 
     let space = StateSpace{1}([(1,)], [1.0], BigInt[2])
         @test RTFOOL.boltzmann(1.0, space) == [1.0]
@@ -196,5 +196,30 @@ end
         0.00190399, 0.000634662, 2.53865e-7, 0.00190399, 0.000158666, 1.05777e-6,
         6.34662e-8, 1.05777e-6, 7.0518e-9]; atol=1e-7)
         @test sum(probs) + pid ≈ 1.0
+    end
+end
+
+let rng = MersenneTwister(2018)
+    @testset "Timestep" begin
+        let ctx = Context(0.5, StateSpace([1,2], 4, [0.1, 1.0], 4), [1, 0, 0])
+            r = re(ctx.system_state, ctx.bath_state)
+            for _ in 1:10000
+                timestep(rng, ctx)
+                rnext = re(ctx.system_state, ctx.bath_state)
+                @test isapprox(rnext, r; atol=1e-9) || rnext < r
+                r = rnext
+            end
+            @test ctx.system_state ≈ ctx.bath_state
+        end
+        let ctx = Context(0.5, StateSpace(1:4, 4, [0.1, 1.0], 4), [1,0,0,0,0])
+            r = re(ctx.system_state, ctx.bath_state)
+            for _ in 1:1000000
+                timestep(rng, ctx)
+                rnext = re(ctx.system_state, ctx.bath_state)
+                @test isapprox(rnext, r; atol=1e-9) || rnext < r
+                r = rnext
+            end
+            @test ctx.system_state ≈ ctx.bath_state
+        end
     end
 end
