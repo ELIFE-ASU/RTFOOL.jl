@@ -79,3 +79,41 @@ function StateSpace(Hm, Nm, Hw, Nw)
 
     StateSpace{Nm + Nw}(basis, energy, degeneracy)
 end
+
+Base.length(s::StateSpace) = length(s.basis)
+
+function degeneracies(s::StateSpace, t::StateSpace)
+    deg_states = NTuple{2, NTuple{2,Int}}[]
+    N = BigInt(0)
+    A = BigInt(0)
+    counts = BigInt[]
+    for i in 1:length(s)
+        for j in 1:length(t)
+            e1 = s.energy[i] + t.energy[j]
+            d1 = s.deg[i] * t.deg[j]
+            A += 0.5 * d1 * (d1 - 1)
+            for l in (j+1):length(t)
+                e2 = s.energy[i] + t.energy[l]
+                d2 = s.deg[i] * t.deg[l]
+                if e1 == e2
+                    push!(deg_states, ((i,j), (i,l)))
+                    push!(counts, d1*d2)
+                    N += counts[end]
+                end
+            end
+            for k in (i+1):length(s)
+                for l in 1:length(t)
+                    e2 = s.energy[k] + t.energy[l]
+                    d2 = s.deg[k] * t.deg[l]
+                    if e1 == e2
+                        push!(deg_states, ((i,j), (k,l)))
+                        push!(counts, d1*d2)
+                        N += counts[end]
+                    end
+                end
+            end
+        end
+    end
+    N += A
+    deg_states, counts/N, A/N
+end

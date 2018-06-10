@@ -4,7 +4,7 @@ module RTFOOL
 
 using Combinatorics, DataStructures
 
-export StateSpace, Context
+export StateSpace, Context, degeneracies
 
 include("space.jl")
 include("boltzmann.jl")
