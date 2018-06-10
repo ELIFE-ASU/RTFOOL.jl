@@ -1,12 +1,10 @@
 using RTFOOL
+using RTFOOL.Monotones
 @static if VERSION < v"0.7.0-DEV.2005"
     using Base.Test
 else
     using Test
 end
-
-re(p, q) = sum(map((p,q) -> (p != zero(p)) ? p*log(p/q) : zero(p), p, q))
-entropy(p) = -dot(p, map(p -> (p != zero(p)) ? log(p) : 0.0, p))
 
 @testset "Boltzmann" begin
     @test RTFOOL.boltzmann(1.0, 1.0) == e^-1.00
@@ -202,24 +200,26 @@ end
 let rng = MersenneTwister(2018)
     @testset "Timestep" begin
         let ctx = Context(0.5, StateSpace([1,2], 4, [0.1, 1.0], 4), [1, 0, 0])
-            r = re(ctx.system_state, ctx.bath_state)
+            re = relative_entropy(ctx.system_state, ctx.bath_state)
             for _ in 1:10000
                 timestep(rng, ctx)
-                rnext = re(ctx.system_state, ctx.bath_state)
-                @test isapprox(rnext, r; atol=1e-9) || rnext < r
-                r = rnext
+                r = relative_entropy(ctx.system_state, ctx.bath_state)
+                @test isapprox(r, re; atol=1e-9) || r < re
+                re = r
             end
             @test ctx.system_state ≈ ctx.bath_state
         end
         let ctx = Context(0.5, StateSpace(1:4, 4, [0.1, 1.0], 4), [1,0,0,0,0])
-            r = re(ctx.system_state, ctx.bath_state)
+            re = relative_entropy(ctx.system_state, ctx.bath_state)
             for _ in 1:1000000
                 timestep(rng, ctx)
-                rnext = re(ctx.system_state, ctx.bath_state)
-                @test isapprox(rnext, r; atol=1e-9) || rnext < r
-                r = rnext
+                r = relative_entropy(ctx.system_state, ctx.bath_state)
+                @test isapprox(r, re; atol=1e-9) || r < re
+                re = r
             end
             @test ctx.system_state ≈ ctx.bath_state
         end
     end
 end
+
+include("monotones.jl")
