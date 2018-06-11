@@ -4,11 +4,47 @@ date: "May 2018"
 author: "Nicole Y. Halpern, Nicolas Mathis, Douglas G. Moore, Sara I. Walker"
 ---
 
-# Setup the project - 2018-05-13
+# Full Rebuild - 2018-06-10
 
-DGM setup the repository, continuous integration, API documentation and started
-creating some basic functions, e.g. `RTFOOL.boltzmann` which computes
-Boltzmann's factor for a given inverse temperature and energy.
+DGM went about rebuilding the framework to better handle large(ish)
+systems. RTFOOL is now built out of two primary components: `StateSpace`
+and `Context`.
+
+## The StateSpace
+
+For the purposes of this work, a state space is built of three components:
+```julia
+type StateSpace
+	basis
+	energy
+	deg
+end
+```
+
+The `basis` field holds the pure configurations of the system as a
+tuple of monomial and water configurations, i.e. a tuple filled with the length
+of the polymer each monomer is in, and the state of each water molecule. The
+`energy` field holds the energy of each configuration, and the `deg` field
+holds the degeneracy, i.e. number of microstates, of each basis configuration.
+
+The state space may correspond to a micro-scale description (if the degeneracy
+of each of the basis configurations is unity) or a macro-scale otherwise.
+The primary constructor for this type constructs a macro-scale description,
+but we could develop micro-level constructors as well.
+
+## The Context
+
+The `Context` type represents a thermalization context, i.e. a system and a
+bath together with all of the metadata necessary to perform thermalization
+time steps. At construction, the bath's Gibbs state is built, the admissible
+swaps and their respective probabilities are constructed. The `timestep`
+method can them perform individual thermalization timesteps, computing the
+next state of the system (stored as the `system_state` field).
+
+## Monotones
+
+We also implemented the `RTFOOL.Monotones` module which provides a suite of
+possible monotones. At the moment, only `relative_entropy` is implemented.
 
 # Implement Context - 2018-05-15
 
@@ -42,3 +78,9 @@ development phase complete:
    states instead of the full tensor space.
 2. *Do not construct the composite state of the system-bath.* The permutations
    can be applied directly to the system's state if we are careful.
+
+# Setup the project - 2018-05-13
+
+DGM setup the repository, continuous integration, API documentation and started
+creating some basic functions, e.g. `RTFOOL.boltzmann` which computes
+Boltzmann's factor for a given inverse temperature and energy.
