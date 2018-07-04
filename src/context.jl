@@ -36,7 +36,9 @@ function timestep(rng::AbstractRNG, ctx::Context)
             ((a,b), (u,v)) = ctx.degeneracies[i]
             Pa, Pb = ctx.system_state[a], ctx.bath_state[b]
             Pu, Pv = ctx.system_state[u], ctx.bath_state[v]
-            dP = Pu*Pv - Pa*Pb
+            degab = ctx.system_space.deg[a] * ctx.bath_space.deg[b]
+            deguv = ctx.system_space.deg[u] * ctx.bath_space.deg[v]
+            dP = ((Pu*Pv)/deguv) - ((Pa*Pb)/degab)
             ctx.system_state[a] += dP
             ctx.system_state[u] -= dP
         end
