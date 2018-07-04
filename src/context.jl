@@ -10,12 +10,14 @@ struct Context{Ns, Nb}
     degeneracies :: Vector{NTuple{2, NTuple{2, Int}}}
     P :: Vector{BigFloat}
     Pid :: BigFloat
+    Pcum :: Vector{BigFloat}
 
     function Context{Ns, Nb}(β::Float64, system_space::StateSpace{Ns}, system_state::AbstractVector,
                              bath_space::StateSpace{Nb}) where{Ns, Nb}
         bath_state = boltzmann(β, bath_space)
         deg, P, Pid = degeneracies(system_space, bath_space)
-        new(β, system_space, system_state, bath_space, bath_state, deg, P, Pid)
+        Pcum = cumsum(P) + Pid
+        new(β, system_space, system_state, bath_space, bath_state, deg, P, Pid, Pcum)
     end
 end
 
@@ -24,12 +26,10 @@ function Context(β::Float64, system_space::StateSpace{N}, system_state::Abstrac
 end
 
 function timestep(rng::AbstractRNG, ctx::Context)
-    p = rand(rng)
+    p, i = BigFloat(rand(rng)), 0
     if p > ctx.Pid
-        p -= ctx.Pid
         i = 1
-        while i < length(ctx.P) && p > ctx.P[i]
-            p -= ctx.P[i]
+        while i < length(ctx.Pcum) && p > ctx.Pcum[i]
             i += 1
         end
         if i <= length(ctx.P)
