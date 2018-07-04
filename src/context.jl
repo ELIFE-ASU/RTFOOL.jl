@@ -43,7 +43,7 @@ function timestep(rng::AbstractRNG, ctx::Context)
             ctx.system_state[u] -= dP
         end
     end
-    ctx.system_state
+    ctx.system_state, i
 end
 
 timestep(ctx::Context) = timestep(Base.GLOBAL_RNG, ctx)
